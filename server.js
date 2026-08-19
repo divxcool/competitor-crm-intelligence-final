@@ -65,7 +65,7 @@ app.post("/api/import",async(req,res)=>{
  const items=split(raw_text),batchId=uid("batch"),now=new Date().toISOString();
  if(pool){
   await pool.query(`INSERT INTO crm_batches VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,[batchId,competitor_id,channel,journey_id||null,source,raw_text,evidence_name,evidence_type,evidence_data,now,items.length]);
-  for(const body of items){const x=classify(body);await pool.query(`INSERT INTO crm_communications VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,[uid("msg"),batchId,competitor_id,channel,journey_id||null,body,x.category,x.offer,x.cta,x.urgency,now])}
+  for(const body of items){const x=classify(body);await pool.query(   `INSERT INTO crm_communications   (id,batch_id,competitor_id,channel,journey_id,body,category,offer,cta,urgency,created_at)   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,   [uid("msg"),batchId,competitor_id,channel,journey_id||null,body,x.category,x.offer,x.cta,x.urgency,now] )}
  }else{
   memory.batches.push({id:batchId,competitor_id,channel,journey_id,source,raw_text,evidence_name,evidence_type,evidence_data,created_at:now,item_count:items.length});
   for(const body of items)memory.communications.push({id:uid("msg"),batch_id:batchId,competitor_id,channel,journey_id,body,...classify(body),created_at:now});
