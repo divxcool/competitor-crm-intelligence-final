@@ -74,5 +74,5 @@ app.post("/api/import",async(req,res)=>{
  res.json({ok:true,batch_id:batchId,imported:items.length});
 });
 app.post("/webhooks/twilio/whatsapp",async(req,res)=>{const body=req.body.Body||"";if(body){const bid=uid("twilio"),x=classify(body);if(pool){await pool.query("INSERT INTO crm_batches(id,channel,source,raw_text,item_count) VALUES($1,$2,$3,$4,1)",[bid,"WhatsApp","twilio",body]);await pool.query("INSERT INTO crm_communications(id,batch_id,channel,body,category,offer,cta,urgency) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",[uid("msg"),bid,"WhatsApp",body,x.category,x.offer,x.cta,x.urgency])}else{memory.batches.push({id:bid,channel:"WhatsApp",source:"twilio",raw_text:body,item_count:1,created_at:new Date().toISOString()});memory.communications.push({id:uid("msg"),batch_id:bid,channel:"WhatsApp",body,...x,created_at:new Date().toISOString()});save()}}res.type("text/xml").send("<Response></Response>")});
-app.get("*",(q,r)=>r.sendFile(path.join(__dirname,"public/index.html")));
+app.get(/.*/,(q,r)=>r.sendFile(path.join(__dirname,"public/index.html")));
 init().then(()=>app.listen(PORT,()=>console.log(`CRM Intel v1.2 running on port ${PORT} | DB: ${!!pool}`))).catch(e=>{console.error(e);process.exit(1)});
